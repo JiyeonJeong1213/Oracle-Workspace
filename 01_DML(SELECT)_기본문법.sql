@@ -1,5 +1,5 @@
 -- DML : 데이터 조작, SELECT(DQL), INSERT, UPDATE, DELETE
--- DDL : 데이터 정의, CREATE, ALETER, DROP
+-- DDL : 데이터 정의, CREATE, ALTER, DROP
 -- TCL : 트랜잭션 제어, COMMIT, ROLLBACK
 -- DCL : 권한부여,  GRANT, REVOKE
 
@@ -361,12 +361,12 @@ FROM EMPLOYEE;
     5. BETWEEN AND
     6. NET
     7. AND
-    8. OR ★
+    8. OR ★ (웬만하면 괄호로 묶어주세용)
     ---------------------------------------------------------------------------
     
     <ORDER BY 절>
     SELECT문 가장 마지막에 기입하는 구문 뿐 아니라 가장 마지막에 실행되는 구문
-    최종 조회된 결과물들에 대해서 정렬 기준을 세워주는 구문
+    최종 조회된 결과물들에 대해서 정렬 기준을 세워주는 구문 (많이 연달아 쓰면 메모리 많이 잡아먹음)
     
     [표현법]
     SELECT 컬럼명1, 컬럼명2, ...
