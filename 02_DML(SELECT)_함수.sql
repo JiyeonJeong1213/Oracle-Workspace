@@ -501,3 +501,163 @@ FROM EMPLOYEE;
 -- 사원명, 부서코드(부서코드가 없는 경우 '없음') 조회
 SELECT EMP_NAME, NVL(DEPT_CODE, '없음')
 FROM EMPLOYEE;
+
+-- NVL2(컬럼명, 결과값1, 결과값2)
+-- 해당 컬럼에 값이 존재할 경우 결과값1 반환
+-- 해당 컬럼에 값이 NULL일 경우 결과값2 반환
+
+-- 보너스가 있는 사원은 '보너스 있음', 보너스가 없는 사원은 '보너스 없음'
+SELECT EMP_NAME, BONUS, NVL2(BONUS, '보너스 있음', '보너스 없음')
+FROM EMPLOYEE;
+
+-- NULLIF(비교대상1, 비교대상2) : 동등비교
+-- 두 값이 동일할 경우 NULL 반환
+-- 두 값이 동일하지 않을 경우 비교대상 1을 반환
+
+SELECT NULLIF('456', '123')
+FROM DUAL;
+
+-- 선택함수 : DECODE => SWITCH문
+-- 선택함수 친구 : CASE WHEN THEN 구문 => IF문
+/*
+    <선택함수>
+    
+    - DECODE(비교대상, 조건값1, 결과값1, 조건값2, 결과값2, 조건값3, 결과값3, ..., 결과값)
+    - 자바에서 SWITCH문과 유사
+    switch(비교대상) {
+    case 조건값1 : 결과값1; break;
+    case 조건값2 : 결과값2; break;
+    case 조건값3 : 결과값3; break;
+    ...
+    default : 결과값
+    }
+    비교대상에는 컬럼명, 산술연산, 함수가 들어갈 수 있음
+*/
+-- 사번, 사원명, 주민번호, 주민번호로부터 성별을 추출하여 1이면 남, 2면 여자 출력
+SELECT 
+    EMP_ID, EMP_NAME, EMP_NO, DECODE(SUBSTR(EMP_NO, 8, 1), 1, '남', 2, '여')성별
+FROM EMPLOYEE;
+
+-- 각 직원들의 급여를 인상시켜서 조회
+-- 직급코드가 'J7'인 사원은 급여를 20% 인상해서 조회
+-- 직급코드가 'J6'인 사원은 급여를 15% 인상해서 조회
+-- 직급코드가 'J5'인 사원은 급여를 50% 인상해서 조회
+-- 그 외 직급은 급여를 10%만 인상해서 조회
+-- 사원명, 직급코드, 변경 전 급여, 변경 후 급여 
+
+SELECT EMP_NAME 사원명, JOB_CODE 직급코드, SALARY "변경 전 급여", DECODE(JOB_CODE, 'J7', SALARY*1.2, 'J6', SALARY*1.15, 'J5', SALARY*1.5, SALARY*1.1) "변경 후 급여"
+FROM EMPLOYEE;
+
+/*
+    CASE WHEN THEN 구문
+    - DECODE 선택함수와 비교하면 DECODE는 해당 조건검사 시 동등비교만을 수행 => SWITCH문과 유사
+    - CASE WHEN THEN 구문은 특정조건을 내맘대로 제시 가능 => IF문과 유사
+    [표현법]
+    CASE WHEN 조건식1 THEN 결과값1
+        WHEN 조건식2 THEN 결과값2
+        ...
+        ELSE 결과값
+        END
+        => 자바에서 IF~ ELSE IF문과 유사
+*/
+-- 사번, 사원명, 주민번호, 주민번호로부터 성별을 추출하여 1이면 남, 2면 여자 출력
+SELECT 
+    EMP_ID, EMP_NAME, EMP_NO, DECODE(SUBSTR(EMP_NO, 8, 1), 1, '남', 2, '여')성별
+FROM EMPLOYEE;
+
+-- CASE WHEN THEN 구문 이용
+-- = : 대입연산자X 동등비교 연산자
+SELECT EMP_ID 사번, EMP_NAME 사원명, EMP_NO 주민번호
+       , CASE WHEN SUBSTR(EMP_NO, 8, 1) = 1 THEN '남자'
+              ELSE '여자'
+              END 성별
+FROM EMPLOYEE;
+
+-- 사원명, 급여, 급여등급(SAL_LEVEL 사용X)
+-- 급여등급 SALARY 값이 500만원 초과일 경우 '고급'
+--                    500만원 이하 350만원 초과 '중급'
+--                    350이하 '초급'
+-- CASE WHEN THEN 구문으로 작성
+SELECT EMP_NAME 사원명, SALARY 급여
+    , CASE WHEN SALARY > 5000000 THEN '고급'
+            WHEN SALARY > 3500000 THEN '중급'
+            ELSE '초급' 
+            END 급여등급
+FROM EMPLOYEE;
+
+-- 여기까지 단일행 함수
+
+-------------------------- <그룹함수> ------------------------------
+-- 그룹함수 : 데이터들의 합, 데이터들의 평균 구합니다. SUM, AVG
+/*
+    N개의 값을 읽어서 1개의 결과를 반환(하나의 그룹별로 함수 실행 결과 반환)
+*/
+
+-- 1. SUM(숫자타입의 컬럼) : 해당 컬럼값들의 총 합계를 반환
+SELECT SUM(SALARY)
+FROM EMPLOYEE;
+
+-- 부서코드가 'D5'인 사원들의 급여 총 합계
+SELECT SUM(SALARY)
+FROM EMPLOYEE
+WHERE DEPT_CODE = 'D5';
+
+-- 2. AVG(숫자타입의 컬럼) : 해당 컬럼값들의 평균을 반환
+SELECT ROUND(AVG(SALARY))
+FROM EMPLOYEE;
+
+-- 3. MIN(ANY 타입) : 해당 컬럼값들 중 가장 작은 값 반환
+SELECT MIN(SALARY), MIN(EMP_NAME), MIN(EMAIL), MIN(HIRE_DATE)
+FROM EMPLOYEE;
+
+-- 4. MAX(ANY 타입) : 해당 컬럼값들 중 가장 큰 값 반환
+SELECT MAX(SALARY), MAX(EMP_NAME), MAX(EMAIL), MAX(HIRE_DATE)
+FROM EMPLOYEE;
+
+-- MAX함수의 경우 내림차순으로 정렬시 가장 위쪽의 값을 보여줌
+
+-- 5. COUNT(*/컬럼이름/DISTINCT 컬럼이름) : 조회된 행의 개수를 세서 반환
+-- COUNT(*) : 조회결과에 해당하는 모든 행의 개수를 다 세서 반환
+-- COUNT(컬럼이름) : 제시한 해당 컬럼값이 NULL이 아닌 것만 행의 개수를 세서 반환
+-- COUNT(DISTINCT 컬럼이름) : 제시한 해당 컬럼값이 중복값이 있을 경우 하나로만 세서 반환, NULL 세지 않음
+
+-- 전체 사원수에 대해 조회
+SELECT COUNT(*)
+FROM EMPLOYEE;
+
+-- 여자인 사원수만 조회
+SELECT COUNT(*)
+FROM EMPLOYEE
+WHERE SUBSTR(EMP_NO, 8, 1) = '2';
+
+-- 부서배치가 완료된 사원수만 조회
+-- 부서배치가 완료되었다 = 부서코드가 NULL이 아니다
+SELECT COUNT(*)
+FROM EMPLOYEE
+WHERE DEPT_CODE IS NOT NULL;
+
+SELECT COUNT(DEPT_CODE)
+FROM EMPLOYEE;
+
+-- 부서배치가 완료된 여자 사원수 조회
+SELECT COUNT(*)
+FROM EMPLOYEE
+WHERE DEPT_CODE IS NOT NULL AND SUBSTR(EMP_NO, 8, 1) = '2';
+
+-- 사수가 있는 사원의 수
+SELECT COUNT(*)
+FROM EMPLOYEE
+WHERE MANAGER_ID IS NOT NULL;
+
+-- 유효한 직급의 개수
+-- = 사원들 직급의 종류 개수 = 회사에 존재하는 직급의 수
+SELECT COUNT(DISTINCT JOB_CODE)
+FROM EMPLOYEE;
+
+-- EMPLOYEE테이블에서 직원명, 부서코드, 생년월일, 나이(만) 조회
+-- 단, 생년얼일은 주민번호에서 추출해서 00년 00월 00일로 출력되게 하며
+-- 나이는 주민번호에서 추출해서 날짜 데이터로 변환한 다음 계산
+SELECT EMP_NAME 직원명, DEPT_CODE 부서코드,
+        TO_CHAR(TO_DATE(SUBSTR(EMP_NO, 1, 6)), 'YY"년" MM"월" DD"일"') 생년월일,
+        EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM TO_DATE(SUBSTR(EMP_NO, 1, 6))) 나이
+FROM EMPLOYEE;
