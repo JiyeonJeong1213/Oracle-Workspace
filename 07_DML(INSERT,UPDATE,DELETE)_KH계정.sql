@@ -150,4 +150,149 @@ DELETE FROM EMP_NEW;
 
 /*
     UPDATE
+    
+    테이블에 기록된 기존의 데이터를 수정하는 구문
+    
+    [표현법]
+    UPDATE 테이블명
+    SET 컬럼명 = 바꿀값
+      , 컬럼명 = 바꿀값
+      , 컬럼명 = 바꿀값 -- 여러개의 값을 동시에 변경가능 (,로 변경할 값들을 나열해야 함/AND 아님)
+      ...
+    WHERE 조건; -- WHERE 생략 가능, 다만 생략하게 되면 해당 테이블의 "모든"행의 데이터가 바뀜
 */
+-- 복사본 테이블 만든 후 작업하기
+CREATE TABLE DEPT_COPY
+AS SELECT * FROM DEPARTMENT;
+
+SELECT * FROM DEPT_COPY;
+
+-- 카피테이블에 D9부서의 부서명을 전략기획팀으로 수정
+UPDATE DEPT_COPY
+SET DEPT_TITLE = '전략기획팀'; -- 9개행의 데이터가 모두 바뀜
+-- 전체 행의 모든 DEPT_TITLE컬럼이 전략기획팀으로 수정됨
+
+ROLLBACK; -- 참고) 변경사항에 대해서 되돌리는 명령어 : ROLLBACK
+
+UPDATE DEPT_COPY
+SET DEPT_TITLE = '전략기획팀'
+WHERE DEPT_ID = 'D9';
+
+COMMIT;
+
+-- 복사본
+-- 테이블명 : EMP_SALARY / 컬럼 : EMPLOYEE테이블에서 EMP_ID, EMP_NAME, DEPT_CODE, SALARY, BONUS(값도 함께)
+CREATE TABLE EMP_SALARY
+AS SELECT EMP_ID, EMP_NAME, DEPT_CODE, SALARY, BONUS
+   FROM EMPLOYEE;
+   
+SELECT * FROM EMP_SALARY;
+
+UPDATE EMP_SALARY
+SET SALARY = 10000000
+WHERE EMP_NAME = '노옹철';
+
+UPDATE EMP_SALARY
+SET SALARY = 7000000,
+    BONUS = NULL
+WHERE EMP_NAME = '선동일';
+
+-- 전체 사원의 급여를 기존 급여의 25%인상 
+UPDATE EMP_SALARY
+SET SALARY = SALARY*1.25;
+
+/*
+    UPDATE시에도 서브쿼리 사용 가능
+    서브쿼리를 수행한 결과값으로 기존의 값으로부터 변경하겠다
+    
+    - CREATE시에 서브쿼리 사용함 : 서브쿼리를 수행한 결과를 테이블 만들 때 넣어버리겠다.
+    - INSERT시에 서브쿼리 사용함 : 서브쿼리를 수행한 결과를 해당 테이블에 삽입하겠다.
+    
+    [표현법]
+    UPDATE 테이블명
+    SET 컬럼명 = (서브쿼리)
+    WHERE 조건절; -- 생략가능
+*/
+
+-- EMP_SALARY테이블에 홍길동 사원의 부서코드를 선동일 사원의 부서코드로 변경
+UPDATE EMP_SALARY
+SET DEPT_CODE = (SELECT DEPT_CODE
+                    FROM EMP_SALARY
+                    WHERE EMP_NAME='선동일')
+WHERE EMP_NAME = '홍길동';
+
+-- 방명수 사원의 급여와 보너스를 유재식 사원의 급여와 보너스값으로 변경
+UPDATE EMP_SALARY
+SET (SALARY, BONUS) = (SELECT SALARY, BONUS
+                        FROM EMP_SALARY
+                        WHERE EMP_NAME = '유재식')
+WHERE EMP_NAME = '방명수';
+
+-- 송중기 직원의 사번을 200으로 바꾸기
+UPDATE EMPLOYEE
+SET EMP_ID = 200
+WHERE EMP_NAME = '송종기';
+
+UPDATE EMPLOYEE
+SET EMP_ID = 905
+WHERE EMP_NAME = '선동일';
+
+ROLLBACK;
+
+/*
+    4. DELETE
+    
+    테이블에 기록된 데이터를 "행"단위로 삭제하는 구문
+    
+    [표현법]
+    DELETE FROM 테이블명
+    WHERE 조건; -- WHERE절 생략 가능. 생략시에는 테이블의 모든 행 삭제
+*/
+
+-- EMPLOYEE테이블의 모든행 삭제
+DELETE FROM EMPLOYEE;
+
+SELECT * FROM EMPLOYEE;
+-- 데이터가 삭제된 거지 테이블이 삭제된 건 아님
+
+ROLLBACK; -- 롤백시 마지막으로 커밋한 시점으로 돌아감
+
+-- DELETE문으로 EMPLOYEE테이블 안의 홍길동, 민경민 정보 지우기
+DELETE FROM EMPLOYEE
+WHERE EMP_NAME IN ('홍길동', '민경민');
+
+-- WHERE절의 조건에 따라 1개 이상의 행 or 0개 행이 변경이 될 수 있다.
+
+COMMIT;
+
+-- DEPARTMENT테이블로부터 DEPT_ID가 D1인 부서 삭제
+DELETE FROM DEPARTMENT
+WHERE DEPT_ID = 'D1';
+-- 만약에 EMPLOYEE테이블의 DEPT_CODE컬럼에서 외래키로 DEPT_ID컬럼을 참조하고 있을 경우
+-- 삭제가 되지 않았을 것
+
+ROLLBACK;
+
+/*
+    TRUNCATE : 테이블의 전체행을 모두 삭제할 때 사용하는 구문
+                DELETE 구문보다 수행속도가 매우 빠름
+                별도의 조건을 제시 불가
+                ROLLBACK이 불가
+                
+    [표현법]
+    TRUNCATE TABLE 테이블명;
+        
+        TRUCATE TABLE 테이블명;             |               DELETE FROM 테이블명
+==============================================================================================
+        별도의 조건 제시 불가                 |               특정조건 제시 가능
+        수행 속도 빠름                       |                   수행 속도 느림
+        ROLLBACK 불가                       |                   ROLLBACK 가능
+*/
+SELECT * FROM EMP_SALARY;
+
+DELETE FROM EMP_SALARY;
+ROLLBACK;
+
+TRUNCATE TABLE EMP_SALARY;
+
+
