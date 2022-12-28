@@ -1,4 +1,6 @@
 -- 1.
+SET SERVEROUTPUT ON;
+
 DECLARE ENAME EMPLOYEE.EMP_NAME%TYPE;
         SALARY EMPLOYEE.SALARY%TYPE;
 BEGIN
@@ -13,25 +15,44 @@ END;
 
 -- 2.
 -- 2-1)
+DECLARE
+    RESULT NUMBER;
 BEGIN 
-    FOR I IN 2..8
+    FOR DAN IN 2..9
     LOOP
-        FOR J IN 1..9
-        LOOP 
-                DBMS_OUTPUT.PUT_LINE(I||'*'||J||'='||I*J);
-        END LOOP;
-        I := I+2;
+       IF MOD(DAN, 2)=0 -- 2로 나눴을 때 나머지가 0인 경우
+            THEN
+                FOR SU IN 1..9
+                LOOP
+                    RESULT := DAN*SU;
+                    DBMS_OUTPUT.PUT_LINE(DAN || '*' || SU || '=' || RESULT);
+                END LOOP;
+                DBMS_OUTPUT.PUT_LINE('');
+       END IF;
     END LOOP;
 END;
 /
 
 -- 2_2)
-DECLARE I := 2;
+DECLARE 
+    RESULT NUMBER;
+    DAN NUMBER := 2;
+    SU NUMBER;
 BEGIN
-    WHILE I <= 8
+    WHILE DAN <= 9
     LOOP
-        WHILE J
-        DBMS_OUTPUT.PUT_LINE(I||'*'||J||'='||I*J);
+        SU := 1;
+        IF MOD(DAN, 2) = 0
+            THEN
+                WHILE SU <= 9
+                LOOP
+                    RESULT := DAN * SU;
+                     DBMS_OUTPUT.PUT_LINE(DAN || '*' || SU || '=' || RESULT);
+                     SU := SU + 1;
+                END LOOP;
+                DBMS_OUTPUT.PUT_LINE('');
+        END IF;
+        DAN := DAN + 2;
     END LOOP;
 END;
 /
